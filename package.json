@@ -1,0 +1,29 @@
+{
+  "name": "stripe-express",
+  "version": "1.0.0",
+  "description": "express server for handling stripe tokens and creating charges",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duke-m/stripe-express.git"
+  },
+  "keywords": [
+    "stripe",
+    "express",
+    "node"
+  ],
+  "author": "duke-m",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/duke-m/stripe-express/issues"
+  },
+  "homepage": "https://github.com/duke-m/stripe-express#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "stripe": "^5.4.0"
+  }
+}
