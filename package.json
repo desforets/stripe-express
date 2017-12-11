@@ -4,7 +4,9 @@
   "description": "express server for handling stripe tokens and creating charges",
   "main": "app.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "node app.js",
+    "startDev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,11 @@
   "homepage": "https://github.com/duke-m/stripe-express#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "stripe": "^5.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.5"
   }
 }
