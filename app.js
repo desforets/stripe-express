@@ -1,8 +1,8 @@
-const keyPublishable = "pk_test_yTXzIGll1qz4bb0a19zOku70";
-const keySecret = "sk_test_qK9z9eiKlAyaskS3K1SnxvRJ";
+const keyPublishable = "pk_test_u77KpSLxrO1jKMrKyA9CZWhy";
+const keySecret = "sk_test_0E1OHzPGuv4uzySbXoqRoboW";
 
 const app = require("express")();
-const stripe = require("stripe")(keySecret);
+const stripe = require("stripe")(process.env.NODE_ENV === 'production' ? process.env.secretKey : keySecret);
 
 const bodyParser = require('body-parser');
 const cors = require('cors')
@@ -25,8 +25,9 @@ app.post('/charge', (req, res) => {
   }).then(customer =>
     stripe.charges.create({
       amount: order.subtotal.grandTotal * 100,
-      description: `Payment to Earth Sun for order #`,
+      description: `Payment to Earth Sun`,
       statement_descriptor: 'Earth Sun ltd',
+      receipt_email: customer.email,
       currency: 'cad',
       customer: customer.id
     }))
@@ -34,6 +35,24 @@ app.post('/charge', (req, res) => {
   .catch(error => res.send(error))
 });
 
+app.post('/order', (req, res) => {
+  const { customer, order, token } = req.body
+  customer.source = token.id
+  stripe.customers.create(customer)
+  .then(newCustomer => {
+    stripe.orders.create({
+      currency: 'cad',
+      items: order,
+      customer: newCustomer.id
+    })
+    .then(order => {
+      stripe.orders.pay(order.id, { customer: newCustomer.id })
+      .then(charge => res.send({charge, order}))
+      .catch(err => { console.error(err); res.send(err)})
+    })
+  })
+})
+
 app.listen(3000, () => {
-  console.log(`Express-Stripe server listenning on port 3000`)
+  console.log(`Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode`)
 });
