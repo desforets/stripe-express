@@ -3,6 +3,7 @@ const keySecret = "sk_test_0E1OHzPGuv4uzySbXoqRoboW";
 
 const app = require("express")();
 const stripe = require("stripe")(process.env.NODE_ENV === 'production' ? process.env.secretKey : keySecret);
+require('./i2i.js')()
 
 const bodyParser = require('body-parser');
 const cors = require('cors')
@@ -47,7 +48,10 @@ app.post('/order', (req, res) => {
     })
     .then(order => {
       stripe.orders.pay(order.id, { customer: newCustomer.id })
-      .then(charge => res.send({charge, order}))
+      .then(charge => {
+        dispatchOrder(customer, order, charge)
+        res.send({charge, order})
+      })
       .catch(err => { console.error(err); res.send(err)})
     })
   })
