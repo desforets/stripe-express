@@ -24,8 +24,10 @@
   },
   "homepage": "https://github.com/duke-m/stripe-express#readme",
   "dependencies": {
+    "axios": "^0.17.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
+    "crypto": "^1.0.1",
     "express": "^4.16.2",
     "stripe": "^5.4.0"
   },

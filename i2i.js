@@ -1,6 +1,8 @@
+const axios = require('axios')
 const crypto = require('crypto')
+
 module.exports = function () {
-  const order = {
+  const orderTemplate = {
     'header': {
       'comment1': 'Test order comment line 1',
       'comment2': 'Test order comment line 2',
@@ -46,46 +48,45 @@ module.exports = function () {
       }
     ]
   }
+
+  const username = 'earths'
+  const customer_id = 162
+  const key = 'be7448380ec44d82a5ce81c38344ed10'
+  const method = 'GET'
+  const server = 'https://dev.i2ilog.net:9090'
+  const url_rule = `/ibis/api/v1.0/customers/${customer_id}/items`
+
   const urls = {
-    getItems: "/ibis/api/v1.0/customers/<int:customer_id>/items",
-    getItemById: "/ibis/api/v1.0/customers/<int:customer_id>/items/id/<int:item_id>",
-    getOrders: "/ibis/api/v1.0/customers/<int:customer_id>/ship/orders",
-    getOrderById: "/ibis/api/v1.0/customers/<int:customer_id>/ship/order/<int:order_id>",
-    postOrder: "/ibis/api/v1.0/customers/<int:customer_id>/ship/order"
+    getItems: `/ibis/api/v1.0/customers/${customer_id}/items`,
+    getItemById: `/ibis/api/v1.0/customers/${customer_id}/items/id/<int:item_id>`,
+    getOrders: `/ibis/api/v1.0/customers/${customer_id}/ship/orders`,
+    getOrderById: `/ibis/api/v1.0/customers/${customer_id}/ship/order/<int:order_id>`,
+    postOrder: `/ibis/api/v1.0/customers/${customer_id}/ship/order`
   }
+  
+  const today = new Date(Date.now())
+  const month = today.getUTCMonth() + 1
+
+  const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
+  const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month > 10 ? month : '0' + month}${today.getUTCDate()}+${nonce}`.toUpperCase()
+
 
   this.dispatchOrder = (customer, order, charge) => {
     console.log('dispatch order')
     console.dir(customer)
     console.dir(order)
     console.dir(charge)
-    const username = "earths"
-    const customer_id = 162
-    const key = "be7448380ec44d82a5ce81c38344ed10"
-    const server = "https://dev.i2ilog.net:9090"
-    const method = 'GET'
-    const url_rule = `/ibis/api/v1.0/customers/${customer_id}/items`
-    const today = new Date(Date.now())
-    const month = today.getMonth() + 1
-    const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-    const msg = (`${method}+${url_rule}+${today.getFullYear()}${month > 10 ? month : '0' + month}${today.getDate()}+${nonce}`).toUpperCase()
-
-    let hmac = crypto.createHMAC(sha256, msg, key)
-    let calculated_hmac_digest = hmac.digest('base64').trim()
-    console.log(calculated_hmac_digest)
-
-    axios.get(url_rule, {
+    axios.post(urls.postOrder, {
       baseURL: server,
       headers: {
-        'X-Echo-Signature': calculated_hmac_digest,
-        'X-Echo-User': `${username}:${nonce}`
-      }
-    })
-    .then(function (response) {
-      console.dir(response)
-    })
-    .catch(function (error) {
-      console.error(error)
-    })
+        'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
+        'X-Echo-User': `earths:${nonce}`
+      },
+      body: Object.assign({}, orderTemplate, order)
+      }).then(response => {
+        console.dir(response.data)
+      }).catch(error => {
+        console.error(error)
+      })
   }
 }
