@@ -63,7 +63,7 @@ module.exports = function () {
     getOrderById: `/ibis/api/v1.0/customers/${customer_id}/ship/order/<int:order_id>`,
     postOrder: `/ibis/api/v1.0/customers/${customer_id}/ship/order`
   }
-  
+
   const today = new Date(Date.now())
   const month = today.getUTCMonth() + 1
 
@@ -76,7 +76,7 @@ module.exports = function () {
     console.dir(customer)
     console.dir(order)
     console.dir(charge)
-    axios.post(urls.postOrder, {
+    return axios.post(urls.postOrder, {
       baseURL: server,
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),

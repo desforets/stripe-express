@@ -50,7 +50,7 @@ app.post('/order', (req, res) => {
       stripe.orders.pay(order.id, { customer: newCustomer.id })
       .then(charge => {
         dispatchOrder(customer, order, charge)
-        res.send({charge, order})
+        .then(dispatchResults => res.send({charge, order, dispatchResults}))
       })
       .catch(err => { console.error(err); res.send(err)})
     })
