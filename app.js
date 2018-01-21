@@ -18,6 +18,17 @@ app.post('/test', function(req, res) {
     res.sendStatus(200);
 });
 
+app.post('/newcustomer', (req, res) => {
+  stripe.customers.create(req.body.customer)
+  .then(customer => {
+    res.json(customer)
+  })
+  .catch(error => {
+    console.error(error)
+    res.json(error)
+  })
+})
+
 app.post('/charge', (req, res) => {
   const { customer, order, token } = req.body
   stripe.customers.create({
