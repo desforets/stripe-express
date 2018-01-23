@@ -19,15 +19,21 @@ app.post('/test', function(req, res) {
 });
 
 app.post('/newcustomer', (req, res) => {
-  stripe.customers.create(req.body.customer)
-  .then(customer => {
-    res.json(customer)
-  })
-  .catch(error => {
-    console.error(error)
-    res.json(error)
-  })
+  if (req.body.member) {
+    stripe.customers.list({email: req.body.customer.email}).then(list => {
+      const customer = list.data[0]
+      if (customer) {
+        res.json(customer)
+      } else {
+        stripe.customers.create(req.body.customer).then(customer => res.json(customer)).catch(error => res.json(error))
+      }
+    })
+  } else {
+    stripe.customers.create(req.body.customer).then(customer => res.json(customer)).catch(error => res.json(error))
+  }
 })
+
+app.post('/addPaymentSource', (req, res) => stripe.customers.update(req.body.customer.id, { source: req.body.token.id }).then(results => res.json(results)).catch(err => res.json(error)))
 
 app.post('/charge', (req, res) => {
   const { customer, order, token } = req.body
