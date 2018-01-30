@@ -19,9 +19,9 @@ app.post('/test', function(req, res) {
 });
 
 app.post('/newcustomer', (req, res) => {
-  if (req.body.member) {
+  if (!req.body.token) {
     stripe.customers.list({email: req.body.customer.email}).then(list => {
-      const customer = list.data[0]
+      let customer = list.data[0]
       if (customer) {
         res.json(customer)
       } else {
