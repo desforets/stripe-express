@@ -1,8 +1,7 @@
-const keyPublishable = "pk_test_u77KpSLxrO1jKMrKyA9CZWhy";
-const keySecret = "sk_test_0E1OHzPGuv4uzySbXoqRoboW";
+const secKeyTest = "sk_test_0E1OHzPGuv4uzySbXoqRoboW";
 
 const app = require("express")();
-const stripe = require("stripe")(process.env.NODE_ENV === 'production' ? process.env.secretKey : keySecret);
+const stripe = require("stripe")(process.env.NODE_ENV === 'production' ? process.env.secretKey : secKeyTest);
 require('./i2i.js')()
 
 const bodyParser = require('body-parser');
