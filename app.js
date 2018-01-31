@@ -1,7 +1,5 @@
-const secKeyTest = "sk_test_0E1OHzPGuv4uzySbXoqRoboW";
-
 const app = require("express")();
-const stripe = require("stripe")(process.env.NODE_ENV === 'production' ? process.env.secretKey : secKeyTest);
+const stripe = require("stripe")(process.env.keySecret);
 require('./i2i.js')()
 
 const bodyParser = require('body-parser');
