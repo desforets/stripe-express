@@ -15,6 +15,20 @@ app.post('/test', function(req, res) {
     res.sendStatus(200);
 });
 
+app.post('/retrieveCustomer', (req, res) => {
+  stripe.customers.list({email: req.body.customer.email}).then(list => {
+    if (list.data.length) {
+      if (list.data[0].id === req.body.customer.id) {
+        res.json(list.data[0])
+      } else {
+        res.json({error: 'That account number does not match this email'})
+      }
+    } else {
+      res.json({error: 'No customers found with that email'})
+    }
+  }
+})
+
 app.post('/newcustomer', (req, res) => {
   if (!req.body.token) {
     stripe.customers.list({email: req.body.customer.email}).then(list => {
