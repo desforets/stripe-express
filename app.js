@@ -1,5 +1,5 @@
 const app = require("express")();
-const stripe = require("stripe")(process.env.keySecret);
+const stripe = require("stripe")(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW');
 require('./i2i.js')()
 
 const bodyParser = require('body-parser');
