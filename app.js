@@ -19,14 +19,14 @@ app.post('/retrieveCustomer', (req, res) => {
   stripe.customers.list({email: req.body.customer.email}).then(list => {
     if (list.data.length) {
       if (list.data[0].id === req.body.customer.id) {
-        res.json(list.data[0])
+        res.json({customer: list.data[0]})
       } else {
         res.json({error: 'That account number does not match this email'})
       }
     } else {
       res.json({error: 'No customers found with that email'})
     }
-  }
+  })
 })
 
 app.post('/newcustomer', (req, res) => {
@@ -82,6 +82,25 @@ app.post('/order', (req, res) => {
       })
       .catch(err => { console.error(err); res.send(err)})
     })
+  })
+})
+
+app.post('/createWholesaleOrder', (req, res) => {
+  const { customer, order } = req.body
+  console.dir(customer)
+  console.dir(order)
+  stripe.orders.create({
+    currency: 'cad',
+    items: order,
+    customer: customer.id
+  })
+  .then(order => {
+    stripe.orders.pay(order.id, { customer: customer.id })
+    .then(charge => {
+      dispatchOrder(customer, order, charge)
+      .then(dispatchResults => res.send({charge, order, dispatchResults}))
+    })
+    .catch(err => { console.error(err); res.send(err)})
   })
 })
 

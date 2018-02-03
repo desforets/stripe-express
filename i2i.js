@@ -65,26 +65,28 @@ module.exports = function () {
   }
 
   const today = new Date(Date.now())
-  const month = today.getUTCMonth() + 1
-
+  const utcMonth = today.getUTCMonth() + 1
+  const month = utcMonth > 9 ? utcMonth : '0' + utcMonth
+  const date = today.getUTCDate() > 9 ? today.getUTCDate() : '0' + today.getUTCDate()
   const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-  const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month > 10 ? month : '0' + month}${today.getUTCDate()}+${nonce}`.toUpperCase()
-
+  const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
     console.log('dispatch order')
     console.dir(customer)
     console.dir(order)
     console.dir(charge)
-    return axios.post(urls.postOrder, {
+    // return axios.post(urls.postOrder, {
+    return axios.get(urls.getItems, {
       baseURL: server,
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
-      },
-      body: Object.assign({}, orderTemplate, order)
+      }
+      // body: Object.assign({}, orderTemplate, order)
       }).then(response => {
         console.dir(response.data)
+        return response.data
       }).catch(error => {
         console.error(error)
       })
