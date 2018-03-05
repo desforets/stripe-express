@@ -53,7 +53,8 @@ module.exports = function () {
   const customer_id = 162
   const key = 'be7448380ec44d82a5ce81c38344ed10'
   const method = 'GET'
-  const server = 'https://dev.i2ilog.net:9090'
+  const dev = 'https://dev.i2ilog.net:9090'
+  const server_ = 'https://van.i2ilog.net:9090'
   const url_rule = `/ibis/api/v1.0/customers/${customer_id}/items`
 
   const urls = {
@@ -76,14 +77,13 @@ module.exports = function () {
     console.dir(customer)
     console.dir(order)
     console.dir(charge)
-    // return axios.post(urls.postOrder, {
-    return axios.get(urls.getItems, {
+    return axios.post(urls.postOrder, {
       baseURL: server,
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
-      }
-      // body: Object.assign({}, orderTemplate, order)
+      },
+      body: Object.assign({}, orderTemplate, order)
       }).then(response => {
         console.dir(response.data)
         return response.data

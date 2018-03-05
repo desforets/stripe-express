@@ -1,6 +1,6 @@
 const app = require("express")();
 const stripe = require("stripe")(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW');
-require('./i2i.js')()
+require('./i2i/i2i.js')()
 
 const bodyParser = require('body-parser');
 const cors = require('cors')
@@ -53,7 +53,7 @@ app.post('/charge', (req, res) => {
     source: token.id
   }).then(customer =>
     stripe.charges.create({
-      amount: order.subtotal.grandTotal * 100,
+      amount: Math.round(order.subtotal.grandTotal * 100),
       description: `Payment to Earth Sun`,
       statement_descriptor: 'Earth Sun ltd',
       receipt_email: customer.email,
@@ -67,22 +67,26 @@ app.post('/charge', (req, res) => {
 app.post('/order', (req, res) => {
   const { customer, order, token } = req.body
   customer.source = token.id
-  stripe.customers.create(customer)
+  return stripe.customers.create(customer)
   .then(newCustomer => {
-    stripe.orders.create({
+    return stripe.orders.create({
       currency: 'cad',
       items: order,
       customer: newCustomer.id
     })
     .then(order => {
-      stripe.orders.pay(order.id, { customer: newCustomer.id })
+      return stripe.orders.pay(order.id, { customer: newCustomer.id })
       .then(charge => {
-        dispatchOrder(customer, order, charge)
-        .then(dispatchResults => res.send({charge, order, dispatchResults}))
+        if (charge.status === 'paid') {
+          dispatchOrder(customer, order, charge)
+          .then(dispatchResults => res.send({charge, order, dispatchResults}))
+        } else {
+          res.send({charge, order})
+        }
       })
-      .catch(err => { console.error(err); res.send(err)})
     })
   })
+  .catch(err => { console.error(err); res.send(err)})
 })
 
 app.post('/createWholesaleOrder', (req, res) => {
