@@ -1,5 +1,6 @@
 const axios = require('axios')
 const crypto = require('crypto')
+const itemsArray = require('./i2i-items-array.js')
 
 module.exports = function () {
   const orderTemplate = {
@@ -48,13 +49,17 @@ module.exports = function () {
       }
     ]
   }
+  let newOrder = {
+    header: {},
+    lines: []
+  }
 
   const username = 'earths'
   const customer_id = 162
   const key = 'be7448380ec44d82a5ce81c38344ed10'
   const method = 'GET'
   const dev = 'https://dev.i2ilog.net:9090'
-  const server_ = 'https://van.i2ilog.net:9090'
+  const server = 'https://van.i2ilog.net:9090'
   const url_rule = `/ibis/api/v1.0/customers/${customer_id}/items`
 
   const urls = {
@@ -73,17 +78,36 @@ module.exports = function () {
   const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
-    console.log('dispatch order')
-    console.dir(customer)
-    console.dir(order)
-    console.dir(charge)
+    customerOrder = {
+      name: customer.shipping.name,
+      email: customer.email,
+      address1: customer.shipping.address.line1,
+      address2: '',
+      city: customer.shipping.address.city,
+      country: customer.shipping.address.country,
+      postal: customer.shipping.address.postal_code,
+      province: customer.shipping.address.state,
+      phone: ''
+    }
+    newOrder.header = {
+      po_no: 'PO-1234',
+      service: 'GROUND',
+      shipper: 'FEDEX',
+      shipto: customerOrder,
+      soldto: customerOrder
+    }
+
+    newOrder.number = order.id
+    newOrder.ref_no = order.id
+    newOrder.lines = items.map(i => Object.assign({}, itemsDictionary[i.parent], {qty: i.quantity}))
+    console.dir(newOrder)
     return axios.post(urls.postOrder, {
-      baseURL: server,
+      baseURL: process.env.NODE_ENV === 'development' ? dev : server,
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
       },
-      body: Object.assign({}, orderTemplate, order)
+      body: newOrder
       }).then(response => {
         console.dir(response.data)
         return response.data
