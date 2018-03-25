@@ -99,7 +99,7 @@ module.exports = function () {
 
     newOrder.number = order.id
     newOrder.ref_no = order.id
-    newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity}))
+    newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
     console.dir(newOrder)
     return axios.post(urls.postOrder, {
       baseURL: process.env.NODE_ENV === 'development' ? dev : server,
