@@ -1,4 +1,4 @@
-module.exports.itemsDictionary =
+module.exports.dictionary =
 {
 
   'ES-BIO-010':
@@ -30,7 +30,7 @@ module.exports.itemsDictionary =
      'NUMBER': 'ES-SUN-008',
      'id': 463604,
      'link': '/cstomers/162/items/id/463604'},
-     
+
   'old': [
     {'DESCRIPTION': 'Bioshield',
     'NUMBER': 'BIO-0001',

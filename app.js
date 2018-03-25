@@ -91,6 +91,7 @@ app.post('/order', (req, res) => {
 
 app.post('/createWholesaleOrder', (req, res) => {
   const { customer, order } = req.body
+  console.log('create wholesale order')
   console.dir(customer)
   console.dir(order)
   stripe.orders.create({
@@ -99,8 +100,11 @@ app.post('/createWholesaleOrder', (req, res) => {
     customer: customer.id
   })
   .then(order => {
+    console.log('created an order')
+    console.dir(order)
     stripe.orders.pay(order.id, { customer: customer.id })
     .then(charge => {
+      console.log('created a charge, dispatching wholesale')
       dispatchOrder(customer, order, charge)
       .then(dispatchResults => res.send({charge, order, dispatchResults}))
     })

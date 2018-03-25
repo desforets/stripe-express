@@ -1,6 +1,6 @@
 const axios = require('axios')
 const crypto = require('crypto')
-const itemsArray = require('./i2i-items-array.js')
+const items = require('./i2i-items-dictionary.js')
 
 module.exports = function () {
   const orderTemplate = {
@@ -99,7 +99,7 @@ module.exports = function () {
 
     newOrder.number = order.id
     newOrder.ref_no = order.id
-    newOrder.lines = items.map(i => Object.assign({}, itemsDictionary[i.parent], {qty: i.quantity}))
+    newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity}))
     console.dir(newOrder)
     return axios.post(urls.postOrder, {
       baseURL: process.env.NODE_ENV === 'development' ? dev : server,
