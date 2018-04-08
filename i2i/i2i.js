@@ -57,7 +57,7 @@ module.exports = function () {
   const username = 'earths'
   const customer_id = 162
   const key = 'be7448380ec44d82a5ce81c38344ed10'
-  const method = 'GET'
+  const method = 'POST'
   let baseURL = process.env.NODE_ENV === 'development' ? 'https://dev.i2ilog.net:9090' : 'https://van.i2ilog.net:9090'
   const urls = {
     getItems: `/ibis/api/v1.0/customers/${customer_id}/items`,
@@ -72,7 +72,7 @@ module.exports = function () {
   const month = utcMonth > 9 ? utcMonth : '0' + utcMonth
   const date = today.getUTCDate() > 9 ? today.getUTCDate() : '0' + today.getUTCDate()
   const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-  const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+  const msg = `${method}+${urls.postOrder}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
 
