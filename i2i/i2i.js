@@ -78,6 +78,9 @@ module.exports = function () {
   const msg = `${method}+${url_rule}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
+
+    console.log(' ++++ dispatch Order')
+
     customerOrder = {
       name: customer.shipping.name,
       email: customer.email,
@@ -92,7 +95,7 @@ module.exports = function () {
     newOrder.header = {
       po_no: 'PO-1234',
       service: 'GROUND',
-      shipper: 'FEDEX',
+      shipper: 'CANADA POST',
       shipto: customerOrder,
       soldto: customerOrder
     }
@@ -100,6 +103,7 @@ module.exports = function () {
     newOrder.number = order.id
     newOrder.ref_no = order.id
     newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
+    console.log(' ++++ processed new order')
     console.dir(newOrder)
     return axios.post(urls.postOrder, {
       baseURL: process.env.NODE_ENV === 'development' ? dev : server,
@@ -109,10 +113,13 @@ module.exports = function () {
       },
       body: newOrder
       }).then(response => {
+        console.log('in response')
         console.dir(response.data)
         return response.data
       }).catch(error => {
+        console.log('caught error :/')
         console.error(error)
+        return error
       })
   }
 }

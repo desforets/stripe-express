@@ -29,6 +29,8 @@ app.post('/retrieveCustomer', (req, res) => {
   })
 })
 
+app.post('/lookupCustomer', (req, res) => stripe.customers.list({email: req.body.customer.email}).then(list => res.json(list.data.length ? {customer: list.data[0]} : {error: 'not found'})))
+
 app.post('/newcustomer', (req, res) => {
   if (!req.body.token) {
     stripe.customers.list({email: req.body.customer.email}).then(list => {
@@ -66,21 +68,30 @@ app.post('/charge', (req, res) => {
 
 app.post('/order', (req, res) => {
   const { customer, order, token } = req.body
+  console.log('==== post req to order endpoint ==== ')
+  console.dir(customer)
+  console.dir(order)
+  console.dir(token)
   customer.source = token.id
   return stripe.customers.create(customer)
   .then(newCustomer => {
+    console.log(' === created new customer: ' + newCustomer.id)
     return stripe.orders.create({
       currency: 'cad',
       items: order,
       customer: newCustomer.id
     })
     .then(order => {
+      console.log(' === created order: ' + order.id)
       return stripe.orders.pay(order.id, { customer: newCustomer.id })
       .then(charge => {
+        console.log(' === created a charge')
+        console.dir(charge)
         if (charge.status === 'paid') {
           dispatchOrder(customer, order, charge)
           .then(dispatchResults => res.send({charge, order, dispatchResults}))
         } else {
+          console.log('charge stats was not paid')
           res.send({charge, order})
         }
       })
