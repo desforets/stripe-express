@@ -58,10 +58,7 @@ module.exports = function () {
   const customer_id = 162
   const key = 'be7448380ec44d82a5ce81c38344ed10'
   const method = 'GET'
-  const dev = 'https://dev.i2ilog.net:9090'
-  const server = 'https://van.i2ilog.net:9090'
-  const url_rule = `/ibis/api/v1.0/customers/${customer_id}/items`
-
+  let baseURL = process.env.NODE_ENV === 'development' ? 'https://dev.i2ilog.net:9090' : 'https://van.i2ilog.net:9090'
   const urls = {
     getItems: `/ibis/api/v1.0/customers/${customer_id}/items`,
     getItemById: `/ibis/api/v1.0/customers/${customer_id}/items/id/<int:item_id>`,
@@ -105,8 +102,8 @@ module.exports = function () {
     newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
     console.log(' ++++ processed new order')
     console.dir(newOrder)
-    return axios.post(urls.postOrder, {
-      baseURL: process.env.NODE_ENV === 'development' ? dev : server,
+    console.log('post to: ' + baseURL + urls.postOrder)
+    return axios.post(baseURL + urls.postOrder, {
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
