@@ -1,4 +1,4 @@
-const axios = require('axios')
+const request = require('request-promise')
 const crypto = require('crypto')
 const items = require('./i2i-items-dictionary.js')
 
@@ -49,22 +49,21 @@ module.exports = function () {
       }
     ]
   }
-  let newOrder = {
+  let ship_order = {
     header: {},
     lines: []
   }
 
   const username = 'earths'
-  const customer_id = 162
+  let customer_id = 'aaa4bac3a7c6'
   const key = 'be7448380ec44d82a5ce81c38344ed10'
-  const method = 'POST'
   let baseURL = process.env.NODE_ENV === 'development' ? 'https://dev.i2ilog.net:9090' : 'https://van.i2ilog.net:9090'
   const urls = {
-    getItems: `/ibis/api/v1.0/customers/${customer_id}/items`,
-    getItemById: `/ibis/api/v1.0/customers/${customer_id}/items/id/<int:item_id>`,
-    getOrders: `/ibis/api/v1.0/customers/${customer_id}/ship/orders`,
-    getOrderById: `/ibis/api/v1.0/customers/${customer_id}/ship/order/<int:order_id>`,
-    postOrder: `/ibis/api/v1.0/customers/${customer_id}/ship/order`
+   getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
+   getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
+   getOrders: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`,
+   getOrderById: `/ibis/api/v1.1/customers/${customer_id}/ship/order/<order_id>`,
+   postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
   }
 
   const today = new Date(Date.now())
@@ -72,7 +71,7 @@ module.exports = function () {
   const month = utcMonth > 9 ? utcMonth : '0' + utcMonth
   const date = today.getUTCDate() > 9 ? today.getUTCDate() : '0' + today.getUTCDate()
   const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-  const msg = `${method}+${urls.postOrder}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+  const msg = `POST+${urls.postOrder}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
 
@@ -83,40 +82,41 @@ module.exports = function () {
       email: customer.email,
       address1: customer.shipping.address.line1,
       address2: '',
+      code: 'Freya',
       city: customer.shipping.address.city,
       country: customer.shipping.address.country,
       postal: customer.shipping.address.postal_code,
       province: customer.shipping.address.state,
       phone: ''
     }
-    newOrder.header = {
-      po_no: 'PO-1234',
-      service: 'GROUND',
-      shipper: 'CANADA POST',
-      shipto: customerOrder,
-      soldto: customerOrder
+    ship_order.header = {
+      'po_no': 'PO-1234',
+      'service': 'GROUND',
+      'shipper': 'CANADA POST',
+      'number': order.id,
+      'ref_no': order.id,
+      'comment1': 'Earth Sun customer order TEST',
+      'comment2': 'Order place via API v1.1',
+      'shipto': customerOrder,
+      'soldto': customerOrder
     }
 
-    newOrder.number = order.id
-    newOrder.ref_no = order.id
-    newOrder.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
+    ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
     console.log(' ++++ processed new order')
-    console.dir(newOrder)
+    console.dir(ship_order)
     console.log('post to: ' + baseURL + urls.postOrder)
-    return axios.post(baseURL + urls.postOrder, {
+    data = {"order": JSON.stringify(ship_order)}
+    return request.post({
       headers: {
         'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
       },
-      body: newOrder
-      }).then(response => {
-        console.log('in response')
-        console.dir(response.data)
-        return response.data
-      }).catch(error => {
-        console.log('caught error :/')
-        console.error(error)
-        return error
-      })
+      url: baseURL + urls['postOrder'],
+      form: data,
+    }).then(response => {
+      response = JSON.parse(response)
+      console.dir(response)
+      return response.status === 'ERR' ? {error: true, message: response.data} : {error: false, orderId: response.data}
+    })
   }
 }

@@ -2,32 +2,32 @@ module.exports.dictionary =
 {
 
   'ES-BIO-010':
-    {'DESCRIPTION': 'BIOSHIELD 2015',
-     'NUMBER': 'ES-BIO-010',
+    {'description': 'BIOSHIELD 2015',
+     'item': 'ES-BIO-010',
      'id': 462014,
      'link': '/cstomers/162/items/id/462014'},
 
   'ES-BEL-010':
-    {'DESCRIPTION': 'BELEIA 2015',
-     'NUMBER': 'ES-BEL-010',
+    {'description': 'BELEIA 2015',
+     'item': 'ES-BEL-010',
      'id': 462016,
      'link': '/cstomers/162/items/id/462016'},
 
   'ES-BUM-010':
-     {'DESCRIPTION': 'COCOBUM 2015',
-     'NUMBER': 'ES-BUM-010',
+     {'description': 'COCOBUM 2015',
+     'item': 'ES-BUM-010',
      'id': 462005,
      'link': '/cstomers/162/items/id/462005'},
 
   'ES-CHI-010':
-     {'DESCRIPTION': 'SUNCHILD 2015',
-     'NUMBER': 'ES-CHI-010',
+     {'description': 'SUNCHILD 2015',
+     'item': 'ES-CHI-010',
      'id': 462006,
      'link': '/cstomers/162/items/id/462006'},
 
   'ES-SUN-008':
-    {'DESCRIPTION': 'Sn Sheer 2015',
-     'NUMBER': 'ES-SUN-008',
+    {'description': 'Sn Sheer 2015',
+     'item': 'ES-SUN-008',
      'id': 463604,
      'link': '/cstomers/162/items/id/463604'},
 

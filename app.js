@@ -90,11 +90,11 @@ app.post('/order', (req, res) => {
         if (charge.status === 'paid') {
           dispatchOrder(customer, order, charge)
           .then(dispatchResults => {
-            res.send({charge, order})
+            res.send({charge, order, dispatchResults})
           })
         } else {
           console.log('charge status was not paid')
-          res.send({charge, order})
+          res.send({charge, order, dispatchResults: null})
         }
       })
     })
