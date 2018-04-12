@@ -95,7 +95,7 @@ module.exports = function () {
       'shipper': 'CANADA POST',
       'number': order.id,
       'ref_no': order.id,
-      'comment1': 'Earth Sun customer order TEST',
+      'comment1': customer.details ? customer.details : `Earth Sun order for ${customer.id}`,
       'comment2': 'Order place via API v1.1',
       'shipto': customerOrder,
       'soldto': customerOrder
