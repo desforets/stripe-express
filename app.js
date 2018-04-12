@@ -17,6 +17,7 @@ app.post('/test', function(req, res) {
 
 app.post('/retrieveCustomer', (req, res) => {
   stripe.customers.list({email: req.body.customer.email}).then(list => {
+    console.dir(list)
     if (list.data.length) {
       if (list.data[0].id === req.body.customer.id) {
         res.json({customer: list.data[0]})
@@ -121,7 +122,10 @@ app.post('/createWholesaleOrder', (req, res) => {
       dispatchOrder(customer, order, charge)
       .then(dispatchResults => res.send({charge, order, dispatchResults}))
     })
-    .catch(err => { console.error(err); res.send(err)})
+    .catch(err => {
+      console.error(err);
+      res.status(err.statusCode).send(err.message)
+    })
   })
 })
 
