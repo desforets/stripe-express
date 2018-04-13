@@ -4,6 +4,15 @@ require('./i2i/i2i.js')()
 
 const bodyParser = require('body-parser');
 const cors = require('cors')
+const automate = {
+  customer: {
+    wholesale: `https://wh.automate.io/webhook/5ad10228e191d220565a5c30`,
+    regular: ``
+  },
+  order: `https://wh.automate.io/webhook/5ad111a8e191d220565a5e08`
+}
+const request = require('request-promise')
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cors())
@@ -33,37 +42,43 @@ app.post('/retrieveCustomer', (req, res) => {
 app.post('/lookupCustomer', (req, res) => stripe.customers.list({email: req.body.customer.email}).then(list => res.json(list.data.length ? {customer: list.data[0]} : {error: 'not found'})))
 
 app.post('/newcustomer', (req, res) => {
-  if (!req.body.token) {
-    stripe.customers.list({email: req.body.customer.email}).then(list => {
-      let customer = list.data[0]
-      if (customer) {
-        res.json(customer)
-      } else {
-        stripe.customers.create(req.body.customer).then(customer => res.json(customer)).catch(error => res.json(error))
-      }
-    })
-  } else {
-    stripe.customers.create(req.body.customer).then(customer => res.json(customer)).catch(error => res.json(error))
-  }
+  console.log('new custy route')
+  let formData = req.body
+  stripe.customers.create(req.body.customer)
+  .then(customer => {
+    request.post({ url: automate.customer.wholesale, form: customer })
+    res.json(customer)
+  })
+  .catch(error => res.json(error))
 })
 
 app.post('/addPaymentSource', (req, res) => stripe.customers.update(req.body.customer.id, { source: req.body.token.id }).then(results => res.json(results)).catch(err => res.json(error)))
 
 app.post('/charge', (req, res) => {
-  const { customer, order, token } = req.body
-  stripe.customers.create({
-    email: customer.email,
-    source: token.id
-  }).then(customer =>
-    stripe.charges.create({
-      amount: Math.round(order.subtotal.grandTotal * 100),
-      description: `Payment to Earth Sun`,
-      statement_descriptor: 'Earth Sun ltd',
-      receipt_email: customer.email,
-      currency: 'cad',
-      customer: customer.id
-    }))
-  .then(charge => res.send(charge))
+  const { customer, order } = req.body
+  console.dir(customer)
+  console.dir(order)
+  return stripe.orders.create({
+    currency: 'cad',
+    items: order,
+    customer: customer.id
+  })
+  .then(order => {
+    return stripe.orders.pay(order.id, { customer: customer.id })
+    .then(charge => {
+      console.log(' === created a charge')
+      console.dir(charge)
+      if (charge.status === 'paid') {
+        dispatchOrder(customer, order, charge)
+        .then(dispatchResults => {
+          res.send({charge, order, dispatchResults})
+        })
+      } else {
+        console.log('charge status was not paid')
+        res.send({charge, order, dispatchResults: null})
+      }
+    })
+  })
   .catch(error => res.send(error))
 });
 
@@ -77,12 +92,14 @@ app.post('/order', (req, res) => {
   return stripe.customers.create(customer)
   .then(newCustomer => {
     console.log(' === created new customer: ' + newCustomer.id)
+    let skus = order.map(item => item.parent).join()
     return stripe.orders.create({
       currency: 'cad',
       items: order,
       customer: newCustomer.id
     })
     .then(order => {
+      // request.post({ url: automate.customer.regular, form: customer })
       console.log(' === created order: ' + order.id)
       return stripe.orders.pay(order.id, { customer: newCustomer.id })
       .then(charge => {
@@ -91,6 +108,7 @@ app.post('/order', (req, res) => {
         if (charge.status === 'paid') {
           dispatchOrder(customer, order, charge)
           .then(dispatchResults => {
+            request.post({ url: automate.order, form: {customer, order, charge, skus, dispatchResults} })
             res.send({charge, order, dispatchResults})
           })
         } else {
@@ -126,6 +144,10 @@ app.post('/createWholesaleOrder', (req, res) => {
       console.error(err);
       res.status(err.statusCode).send(err.message)
     })
+  })
+  .catch(err => {
+    console.error(err)
+    res.status(err.statusCode).send(err.message)
   })
 })
 
