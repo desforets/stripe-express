@@ -117,6 +117,9 @@ module.exports = function () {
       response = JSON.parse(response)
       console.dir(response)
       return response.status === 'ERR' ? {error: true, message: response.data} : {error: false, orderId: response.data}
+    }).catch(error => {
+      console.error(error)
+      return {error: true, message: error.message}
     })
   }
 }

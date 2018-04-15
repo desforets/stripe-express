@@ -106,9 +106,10 @@ app.post('/order', (req, res) => {
         console.log(' === created a charge')
         console.dir(charge)
         if (charge.status === 'paid') {
+          request.post({ url: automate.order, form: {customer, order, charge, skus} })
           dispatchOrder(customer, order, charge)
           .then(dispatchResults => {
-            request.post({ url: automate.order, form: {customer, order, charge, skus, dispatchResults} })
+            console.dir(dispatchResults)
             res.send({charge, order, dispatchResults})
           })
         } else {
