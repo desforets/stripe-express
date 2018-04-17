@@ -68,10 +68,10 @@ module.exports = function () {
 
   const today = new Date(Date.now())
   const utcMonth = today.getUTCMonth() + 1
-  const month = utcMonth > 9 ? utcMonth : '0' + utcMonth
-  const date = today.getUTCDate() > 9 ? today.getUTCDate() : '0' + today.getUTCDate()
+  const month = utcMonth > 9 ? utcMonth : `0${utcMonth}`
+  const date = today.getUTCDate() > 9 ? today.getUTCDate() : `0${today.getUTCDate()}`
   const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-  const msg = `POST+${urls.postOrder}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+  const msg = `POST+${urls['postOrder']}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
   this.dispatchOrder = (customer, order, charge) => {
 
@@ -104,7 +104,8 @@ module.exports = function () {
     ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
     console.log(' ++++ processed new order')
     console.dir(ship_order)
-    console.log('post to: ' + baseURL + urls.postOrder)
+    console.log('post to: ' + baseURL + urls['postOrder'])
+    console.log(msg)
     data = {"order": JSON.stringify(ship_order)}
     return request.post({
       headers: {
