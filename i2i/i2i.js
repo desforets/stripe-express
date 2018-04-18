@@ -57,7 +57,7 @@ module.exports = function () {
   const username = 'earths'
   let customer_id = 'aaa4bac3a7c6'
   const key = 'be7448380ec44d82a5ce81c38344ed10'
-  let baseURL = process.env.NODE_ENV === 'development' ? 'https://dev.i2ilog.net:9090' : 'https://van.i2ilog.net:9090'
+  let baseURL = `https://van.i2ilog.net:9090`
   const urls = {
    getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
    getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
@@ -66,12 +66,16 @@ module.exports = function () {
    postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
   }
 
-  const today = new Date(Date.now())
+  const today = new Date()
   const utcMonth = today.getUTCMonth() + 1
   const month = utcMonth > 9 ? utcMonth : `0${utcMonth}`
   const date = today.getUTCDate() > 9 ? today.getUTCDate() : `0${today.getUTCDate()}`
   const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-  const msg = `POST+${urls['postOrder']}+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+  const msg = `POST+/ibis/api/v1.1/customers/${customer_id}/ship/orders+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+
+  let hmac = crypto.createHmac('sha256', key)
+  hmac.update(msg)
+  let calculated_hmac_digest = hmac.digest('base64')
 
   this.dispatchOrder = (customer, order, charge) => {
 
@@ -95,7 +99,7 @@ module.exports = function () {
       'shipper': 'CANADA POST',
       'number': order.id,
       'ref_no': order.id,
-      'comment1': process.env.NODE_ENV === 'production' ? customer.details ? customer.details : `Earth Sun order for ${order.customer}` : 'TEST ORDER',
+      'comment1': `Earth Sun order for ${order.customer}`,
       'comment2': 'Order place via API v1.1',
       'shipto': customerOrder,
       'soldto': customerOrder
@@ -109,10 +113,10 @@ module.exports = function () {
     data = {"order": JSON.stringify(ship_order)}
     return request.post({
       headers: {
-        'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
+        'X-Echo-Signature': calculated_hmac_digest,
         'X-Echo-User': `earths:${nonce}`
       },
-      url: baseURL + urls['postOrder'],
+      url: `https://van.i2ilog.net:9090/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
       form: data,
     }).then(response => {
       response = JSON.parse(response)
