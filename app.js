@@ -69,7 +69,7 @@ app.post('/charge', (req, res) => {
       console.log(' === created a charge')
       console.dir(charge)
       if (charge.status === 'paid') {
-        dispatchOrder(customer, order, charge)
+        dispatchOrder(customer, order, charge, false)
         .then(dispatchResults => {
           res.send({charge, order, dispatchResults})
         })
@@ -107,7 +107,7 @@ app.post('/order', (req, res) => {
         console.dir(charge)
         if (charge.status === 'paid') {
           request.post({ url: automate.order, form: {customer, order, charge, skus} })
-          dispatchOrder(customer, order, charge)
+          dispatchOrder(customer, order, charge, false)
           .then(dispatchResults => {
             console.dir(dispatchResults)
             res.send({charge, order, dispatchResults})
@@ -138,7 +138,7 @@ app.post('/createWholesaleOrder', (req, res) => {
     stripe.orders.pay(order.id, { customer: customer.id })
     .then(charge => {
       console.log('created a charge, dispatching wholesale')
-      dispatchOrder(customer, order, charge)
+      dispatchOrder(customer, order, charge, true)
       .then(dispatchResults => res.send({charge, order, dispatchResults}))
     })
     .catch(err => {

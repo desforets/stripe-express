@@ -55,9 +55,9 @@ module.exports = function () {
   }
 
   const username = 'earths'
-  let customer_id = 'aaa4bac3a7c6'
+  const customer_id = 'aaa4bac3a7c6'
   const key = 'be7448380ec44d82a5ce81c38344ed10'
-  let baseURL = `https://van.i2ilog.net:9090`
+  const baseURL = `https://van.i2ilog.net:9090`
   const urls = {
    getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
    getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
@@ -75,9 +75,9 @@ module.exports = function () {
 
   let hmac = crypto.createHmac('sha256', key)
   hmac.update(msg)
-  let calculated_hmac_digest = hmac.digest('base64')
+  const calculated_hmac_digest = hmac.digest('base64')
 
-  this.dispatchOrder = (customer, order, charge) => {
+  this.dispatchOrder = (customer, order, charge, wholesale) => {
 
     console.log(' ++++ dispatch Order')
 
@@ -105,19 +105,19 @@ module.exports = function () {
       'soldto': customerOrder
     }
 
-    ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: i.quantity})).filter(item => item.qty)
+    ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: wholesale ? i.quantity * 12 : i.quantity})).filter(item => item.qty)
     console.log(' ++++ processed new order')
     console.dir(ship_order)
     console.log('post to: ' + baseURL + urls['postOrder'])
     console.log(msg)
-    data = {"order": JSON.stringify(ship_order)}
+    let data = {"order": JSON.stringify(ship_order)}
     return request.post({
       headers: {
         'X-Echo-Signature': calculated_hmac_digest,
         'X-Echo-User': `earths:${nonce}`
       },
       url: `https://van.i2ilog.net:9090/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
-      form: data,
+      form: data
     }).then(response => {
       response = JSON.parse(response)
       console.dir(response)
