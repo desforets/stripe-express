@@ -57,7 +57,7 @@ module.exports = function () {
   const username = 'earths'
   const customer_id = 'aaa4bac3a7c6'
   const key = 'be7448380ec44d82a5ce81c38344ed10'
-  const baseURL = `https://van.i2ilog.net:9090`
+  const baseURL = process.env.NODE_ENV === 'production' ? `https://van.i2ilog.net:9090` : `https://dev.i2ilog.net:9090/`
   const urls = {
    getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
    getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
@@ -116,7 +116,7 @@ module.exports = function () {
         'X-Echo-Signature': calculated_hmac_digest,
         'X-Echo-User': `earths:${nonce}`
       },
-      url: `https://van.i2ilog.net:9090/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
+      url: `${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
       form: data
     }).then(response => {
       response = JSON.parse(response)

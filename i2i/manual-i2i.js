@@ -2,48 +2,49 @@ const crypto = require('crypto')
 const request = require('request-promise');
 
 var ship_order = JSON.stringify(
-  { header:
-    { po_no: 'PO-1234',
-      service: 'GROUND',
-      shipper: 'CANADA POST',
-      number: 'or_ChHu4i9LxFrpW4',
-      ref_no: 'or_ChHu4i9LxFrpW4',
-      comment1: 'Earth Sun order for cus_ChHtZ3ge4Ofsxd',
-      comment2: 'Order place via API v1.1',
-      shipto:
-       { name: 'kathleen shaffer',
-         email: 'kittyshff@msn.com',
-         address1: '338 Rively Ave',
-         address2: '',
-         code: 'Freya',
-         city: 'Collingdale',
-         country: 'US',
-         postal: '19023',
-         province: 'PA',
-         phone: '' },
-      soldto:
-       { name: 'kathleen shaffer',
-         email: 'kittyshff@msn.com',
-         address1: '338 Rively Ave',
-         address2: '',
-         code: 'Freya',
-         city: 'Collingdale',
-         country: 'US',
-         postal: '19023',
-         province: 'PA',
-         phone: '' } },
-   lines:
-    [ { description: 'BIOSHIELD 2015',
-        item: 'ES-BIO-010',
-        id: 462014,
-        link: '/cstomers/162/items/id/462014',
-        qty: 1 } ] }
+   { header:
+      { po_no: 'PO-1234',
+        service: 'GROUND',
+        shipper: 'CANADA POST',
+        number: 'or_CiRtHHa2PkMvz7',
+        ref_no: 'or_CiRtHHa2PkMvz7',
+        comment1: 'Earth Sun order for 490189',
+        comment2: 'Order place via API v1.1',
+        shipto:
+         { name: 'Living Earth Beauty',
+           email: 'delight@livingearthbeauty.com',
+           address1: '3225 E Iris Ct',
+           address2: '',
+           code: 'Freya',
+           city: 'Chandler',
+           country: 'US',
+           postal: '85286',
+           province: 'AZ',
+           phone: '' },
+        soldto:
+         { name: 'Living Earth Beauty',
+           email: 'delight@livingearthbeauty.com',
+           address1: '3225 E Iris Ct',
+           address2: '',
+           code: 'Freya',
+           city: 'Chandler',
+           country: 'US',
+           postal: '85286',
+           province: 'AZ',
+           phone: '' } },
+     lines:
+      [ { description: 'Sn Sheer 2015',
+          item: 'ES-SUN-008',
+          id: 463604,
+          link: '/cstomers/162/items/id/463604',
+          qty: 36 } ] }
+
 )
 
 const username = 'earths'
 let customer_id = 'aaa4bac3a7c6'
 const key = 'be7448380ec44d82a5ce81c38344ed10'
-let baseURL = 'https://van.i2ilog.net:9090'
+let baseURL = `https://van.i2ilog.net:9090`
 const urls = {
  getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
  getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
@@ -52,7 +53,7 @@ const urls = {
  postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
 }
 
-const today = new Date(Date.now())
+const today = new Date()
 const utcMonth = today.getUTCMonth() + 1
 const month = utcMonth > 9 ? utcMonth : `0${utcMonth}`
 const date = today.getUTCDate() > 9 ? today.getUTCDate() : `0${today.getUTCDate()}`
