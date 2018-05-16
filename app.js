@@ -106,12 +106,15 @@ app.post('/order', (req, res) => {
         console.log(' === created a charge')
         console.dir(charge)
         if (charge.status === 'paid') {
-          request.post({ url: automate.order, form: {customer, order, charge, skus} })
+          if (process.env.NODE_ENV === 'production') {
+            request.post({ url: automate.order, form: {customer, order, charge, skus} })
+          }
           dispatchOrder(customer, order, charge, false)
           .then(dispatchResults => {
             console.dir(dispatchResults)
             res.send({charge, order, dispatchResults})
           })
+          .catch(error => res.send({charge, order, error}))
         } else {
           console.log('charge status was not paid')
           res.send({charge, order, dispatchResults: null})
@@ -153,5 +156,5 @@ app.post('/createWholesaleOrder', (req, res) => {
 })
 
 app.listen(3000, () => {
-  console.log(`Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode`)
+  console.log(`Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode with ${process.env.keySecret ? 'secret' : 'test'} key`)
 });
