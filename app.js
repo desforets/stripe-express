@@ -100,10 +100,10 @@ app.post('/order', (req, res) => {
     })
     .then(order => {
       // request.post({ url: automate.customer.regular, form: customer })
-      console.log(' === created order: ' + order.id)
+      console.log(`=== created order: ${order.id} ===`)
       return stripe.orders.pay(order.id, { customer: newCustomer.id })
       .then(charge => {
-        console.log(' === created a charge')
+        console.log(`=== created a charge ${charge.id} ===`)
         console.dir(charge)
         if (charge.status === 'paid') {
           if (process.env.NODE_ENV === 'production') {
@@ -111,6 +111,7 @@ app.post('/order', (req, res) => {
           }
           dispatchOrder(customer, order, charge, false)
           .then(dispatchResults => {
+            console.log('=== Dispatch resulsts ===')
             console.dir(dispatchResults)
             res.send({charge, order, dispatchResults})
           })
@@ -122,7 +123,11 @@ app.post('/order', (req, res) => {
       })
     })
   })
-  .catch(err => { console.error(err); res.send(err)})
+  .catch(err => {
+    console.log('ORDERS ENDPOINT CAUGHT ERROR')
+    console.error(err)
+    res.send(err)
+  })
 })
 
 app.post('/createWholesaleOrder', (req, res) => {
