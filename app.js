@@ -115,18 +115,21 @@ app.post('/order', (req, res) => {
             console.dir(dispatchResults)
             res.send({charge, order, dispatchResults})
           })
-          .catch(error => res.send({charge, order, error}))
+          .catch(error => {
+            console.log('caught error from dispatch results')
+            res.send({charge, order, error})
+          })
         } else {
           console.log('charge status was not paid')
-          res.send({charge, order, dispatchResults: null})
+          res.status(400).send({response: {data: {message: 'Payment failed. Card declined.'}}})
         }
       })
     })
   })
   .catch(err => {
-    console.log('ORDERS ENDPOINT CAUGHT ERROR')
+    console.log('---- ORDERS ENDPOINT CAUGHT ERROR ----')
     console.error(err)
-    res.send(err)
+    res.status(err.statusCode).send(err)
   })
 })
 
