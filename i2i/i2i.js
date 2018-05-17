@@ -3,13 +3,6 @@ const crypto = require('crypto')
 const items = require('./i2i-items-dictionary.js')
 
 module.exports = function () {
-  const urls = {
-   getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
-   getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
-   getOrders: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`,
-   getOrderById: `/ibis/api/v1.1/customers/${customer_id}/ship/order/<order_id>`,
-   postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
-  }
 
   this.dispatchOrder = (customer, order, charge, wholesale) => {
 
@@ -22,6 +15,14 @@ module.exports = function () {
     const customer_id = 'aaa4bac3a7c6'
     const key = 'be7448380ec44d82a5ce81c38344ed10'
     const baseURL = 'https://van.i2ilog.net:9090'
+
+    const urls = {
+      getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
+      getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
+      getOrders: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`,
+      getOrderById: `/ibis/api/v1.1/customers/${customer_id}/ship/order/<order_id>`,
+      postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
+    }
 
     const today = new Date()
     console.log(`dispatching at: ${today}`)
@@ -67,7 +68,7 @@ module.exports = function () {
     console.log(`earths:${nonce}`)
     return request.post({
       headers: {
-        'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64')
+        'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
         'X-Echo-User': `earths:${nonce}`
       },
       url: `${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
