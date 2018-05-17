@@ -86,7 +86,7 @@ module.exports = function () {
       email: customer.email,
       address1: customer.shipping.address.line1,
       address2: '',
-      code: 'Freya',
+      code: 'Website',
       city: customer.shipping.address.city,
       country: customer.shipping.address.country,
       postal: customer.shipping.address.postal_code,
@@ -106,9 +106,9 @@ module.exports = function () {
     }
 
     ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: wholesale ? i.quantity * 12 : i.quantity})).filter(item => item.qty)
-    console.log(' ++++ processed new order')
+    console.log(' ++++ processed new order ++++')
     console.dir(ship_order)
-    console.log('post to: ' + baseURL + urls['postOrder'])
+    console.log(`post to: ${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`)
     console.log(msg)
     let data = {"order": JSON.stringify(ship_order)}
     return request.post({
