@@ -163,6 +163,12 @@ app.post('/createWholesaleOrder', (req, res) => {
   })
 })
 
+app.post('/chargeWholesaleOrder', (req, res) => {
+  console.log('chargeWholesaleOrder')
+  console.dir(req.body)
+  res.sendStatus(200)
+})
+
 app.listen(3000, () => {
   console.log(`Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode with ${process.env.keySecret ? 'secret' : 'test'} key`)
 });
