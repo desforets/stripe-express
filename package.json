@@ -10,21 +10,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/duke-m/stripe-express.git"
+    "url": "git+https://github.com/desforets/stripe-express.git"
   },
   "keywords": [
     "stripe",
     "express",
     "node"
   ],
-  "author": "duke-m",
+  "author": "desforets",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/duke-m/stripe-express/issues"
+    "url": "https://github.com/desforets/stripe-express/issues"
   },
-  "homepage": "https://github.com/duke-m/stripe-express#readme",
+  "homepage": "https://github.com/desforets/stripe-express#readme",
   "dependencies": {
-    "axios": "^0.17.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "crypto": "^1.0.1",

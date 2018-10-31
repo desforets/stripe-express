@@ -135,40 +135,68 @@ app.post('/order', (req, res) => {
 })
 
 app.post('/createWholesaleOrder', (req, res) => {
-  const { customer, order } = req.body
-  console.log('create wholesale order')
-  console.dir(customer)
-  console.dir(order)
-  return stripe.orders.create({
-    currency: 'cad',
-    items: order,
-    customer: customer.id
-  })
-  .then(order => {
-    console.log('created an order')
-    console.dir(order)
-    stripe.orders.pay(order.id, { customer: customer.id })
-    .then(charge => {
-      console.log('created a charge, dispatching wholesale')
-      dispatchOrder(customer, order, charge, true)
-      .then(dispatchResults => res.send({charge, order, dispatchResults}))
+  console.log('createWholesaleInvoice')
+  console.dir(req.body)
+  const customer = req.body.customer
+  return Promise.all(req.body.order.map(item => stripe.invoiceItems.create(item.type === 'shipping' ? {
+    customer: customer.id,
+    currency: item.currency,
+    description: item.express ? `Express Shipping` : `Regular Shipping`,
+    amount: item.amount
+  } : {
+    customer: customer.id,
+    unit_amount: item.price * 100,
+    quantity: item.quantity,
+    currency: item.currency,
+    description: `Case of ${item.name} (12 units)`
+  }))).then(invoiceItemsCreated => {
+    console.dir(invoiceItemsCreated)
+    let invoice = Object.assign({}, {
+        customer: customer.id,
+        tax_percent: 5,
+        description: customer.details || 'Wholesale order for Earthsun',
+        statement_descriptor: 'Earthsun Wholesale'
+      }, customer.metadata.payment === 'defer' ? { billing: 'send_invoice', days_until_due: 30 } : { billing: 'charge_automatically' })
+    return stripe.invoices.create(invoice).then(invoice => {
+      console.dir(invoice)
+      res.send({invoice, customer, error: null, order: req.body.order})
+    }).catch(error => {
+      console.error(error)
+      res.send({error})
     })
-    .catch(err => {
-      console.error(err);
-      res.status(err.statusCode).send(err.message)
-    })
+  }).catch(error => {
+    console.error(error)
+    res.send({error})
   })
-  .catch(err => {
-    console.error(err)
-    res.status(err.statusCode).send(err.message)
-  })
+  //
+  // const { customer, order } = req.body
+  // console.log('create wholesale order')
+  // console.dir(customer)
+  // console.dir(order)
+  // return stripe.orders.create({
+  //   currency: 'cad',
+  //   items: order,
+  //   customer: customer.id
+  // })
+  // .then(order => {
+  //   console.log('created an order')
+  //   console.dir(order)
+  //   stripe.orders.pay(order.id, { customer: customer.id })
+  //   .then(charge => {
+  //     console.log('created a charge, dispatching wholesale')
+  //     dispatchOrder(customer, order, charge, true)
+  //     .then(dispatchResults => res.send({charge, order, dispatchResults}))
+  //   })
+  //   .catch(err => {
+  //     console.error(err);
+  //     res.status(err.statusCode).send(err.message)
+  //   })
+  // })
+  // .catch(err => {
+  //   console.error(err)
+  //   res.status(err.statusCode).send(err.message)
+  // })
 })
-
-// app.post('/chargeWholesaleOrder', (req, res) => {
-//   console.log('chargeWholesaleOrder')
-//   console.dir(req.body)
-//   res.sendStatus(200)
-// })
 
 app.post('/createinvoice', (req, res) => {
   console.log('createWholesaleInvoice')
