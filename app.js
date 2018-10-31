@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(cors())
 app.get('/', (req, res) => res.sendStatus(200))
 
-app.post('/test', function(req, res) {
+app.post('/test', (req, res) => {
     console.log("Information received !");
     console.log(req.body);
     res.sendStatus(200);
@@ -26,7 +26,7 @@ app.post('/test', function(req, res) {
 
 app.post('/retrieveCustomer', (req, res) => {
   console.log('retrieveCustomer')
-  stripe.customers.list({email: req.body.customer.email}).then(list => {
+  return stripe.customers.list({email: req.body.customer.email}).then(list => {
     console.dir(list)
     if (list.data.length) {
       if (list.data[0].id === req.body.customer.id) {
@@ -45,7 +45,7 @@ app.post('/lookupCustomer', (req, res) => stripe.customers.list({email: req.body
 app.post('/newcustomer', (req, res) => {
   console.log('new custy route')
   let formData = req.body
-  stripe.customers.create(req.body.customer)
+  return stripe.customers.create(req.body.customer)
   .then(customer => {
     request.post({ url: automate.customer.wholesale, form: customer })
     res.json(customer)
@@ -139,7 +139,7 @@ app.post('/createWholesaleOrder', (req, res) => {
   console.log('create wholesale order')
   console.dir(customer)
   console.dir(order)
-  stripe.orders.create({
+  return stripe.orders.create({
     currency: 'cad',
     items: order,
     customer: customer.id
@@ -164,13 +164,13 @@ app.post('/createWholesaleOrder', (req, res) => {
   })
 })
 
-app.post('/chargeWholesaleOrder', (req, res) => {
-  console.log('chargeWholesaleOrder')
-  console.dir(req.body)
-  res.sendStatus(200)
-})
+// app.post('/chargeWholesaleOrder', (req, res) => {
+//   console.log('chargeWholesaleOrder')
+//   console.dir(req.body)
+//   res.sendStatus(200)
+// })
 
-app.post('/createWholesaleInvoice', (req, res) => {
+app.post('/createinvoice', (req, res) => {
   console.log('createWholesaleInvoice')
   console.dir(req.body)
   const customer = req.body.customer
