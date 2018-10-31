@@ -207,5 +207,6 @@ app.post('/createWholesaleInvoice', (req, res) => {
 })
 
 app.listen(3000, () => {
-  console.log(`Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode with ${process.env.keySecret ? 'secret' : 'test'} key`)
+  console.log(`
+    Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode with ${process.env.keySecret ? process.env.keySecret.includes('live') ? 'secret' : 'test' : 'test'} key`)
 });
