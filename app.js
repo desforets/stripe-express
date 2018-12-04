@@ -1,7 +1,6 @@
 const app = require('express')()
 const stripe = require('stripe')(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW')
 require('./i2i/i2i.js')()
-console.dir(process.env)
 const shopify_hmac = process.env.shopify_hmac || 'noneset'
 
 const bodyParser = require('body-parser');
@@ -16,7 +15,15 @@ const automate = {
 const request = require('request-promise')
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+  type:'*/*',
+  limit: '50mb',
+  verify: function(req, res, buf) {
+      if (req.url.startsWith('/shopify')){
+        req.shopify_data = buf;
+      }
+    }
+  }));
 app.use(cors())
 app.get('/', (req, res) => res.sendStatus(200))
 
