@@ -1,5 +1,5 @@
-const app = require("express")();
-const stripe = require("stripe")(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW');
+const app = require('express')()
+const stripe = require('stripe')(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW')
 require('./i2i/i2i.js')()
 
 const bodyParser = require('body-parser');
@@ -135,34 +135,42 @@ app.post('/order', (req, res) => {
 })
 
 app.post('/createWholesaleOrder', (req, res) => {
-  console.log('createWholesaleInvoice')
+  console.log('createWholesaleOrder!')
   console.dir(req.body)
+  const invoice_memo = `Thanks for your business - we love you! Take a picture with EarthSun and tag #LoveTheSun to be featured on our account!`
   const customer = req.body.customer
   return Promise.all(req.body.order.map(item => stripe.invoiceItems.create(item.type === 'shipping' ? {
     customer: customer.id,
     currency: item.currency,
-    description: item.express ? `Express Shipping` : `Regular Shipping`,
-    amount: item.amount
+    description: item.description,
+    amount: item.amount,
+    quantity: item.quantity
   } : {
     customer: customer.id,
-    unit_amount: item.price * 100,
-    quantity: item.quantity,
     currency: item.currency,
-    description: `Case of ${item.name} (12 units)`
+    description: `Case of ${item.name} (12 units)`,
+    unit_amount: item.price * 100,
+    quantity: item.quantity
   }))).then(invoiceItemsCreated => {
     console.dir(invoiceItemsCreated)
     let invoice = Object.assign({}, {
         customer: customer.id,
-        tax_percent: 5,
-        description: customer.details || 'Wholesale order for Earthsun',
+        tax_percent: 12,
+        description: customer.details ? `${customer.details} \n ${invoice_memo}` : `${invoice_memo}`,
         statement_descriptor: 'Earthsun Wholesale'
       }, customer.metadata.payment === 'defer' ? { billing: 'send_invoice', days_until_due: 30 } : { billing: 'charge_automatically' })
     return stripe.invoices.create(invoice).then(invoice => {
       console.dir(invoice)
+      // if (process.env.NODE_ENV === 'production') {
+      //   request.post({ url: automate.order, form: {customer, invoice, charge, skus} })
+      // }
+      // dispatchOrder(customer, invoice, charge, true)
+      // .then(dispatchResults => {
+      //   console.log('=== Dispatch resulsts ===')
+      //   console.dir(dispatchResults)
+      //   res.send({charge, order, dispatchResults})
+      // })
       res.send({invoice, customer, error: null, order: req.body.order})
-    }).catch(error => {
-      console.error(error)
-      res.send({error})
     })
   }).catch(error => {
     console.error(error)
@@ -197,15 +205,16 @@ app.post('/createWholesaleOrder', (req, res) => {
   //   res.status(err.statusCode).send(err.message)
   // })
 })
-
+// Warning the following route is deprecated! do not use, here for reference
 app.post('/createinvoice', (req, res) => {
   console.log('createWholesaleInvoice')
   console.dir(req.body)
+  const invoice_memo = `Thanks for your business - we love you! Take a picture with EarthSun and tag #LoveTheSun to be featured on our account!`
   const customer = req.body.customer
   return Promise.all(req.body.order.map(item => stripe.invoiceItems.create(item.type === 'shipping' ? {
     customer: customer.id,
     currency: item.currency,
-    description: item.express ? `Express Shipping` : `Regular Shipping`,
+    description: item.description,
     amount: item.amount
   } : {
     customer: customer.id,
@@ -218,7 +227,7 @@ app.post('/createinvoice', (req, res) => {
     let invoice = Object.assign({}, {
         customer: customer.id,
         tax_percent: 5,
-        description: customer.details || 'Wholesale order for Earthsun',
+        description: customer.details ? `${customer.details} \n ${invoice_memo}` : `${invoice_memo}`,
         statement_descriptor: 'Earthsun Wholesale'
       }, customer.metadata.payment === 'defer' ? { billing: 'send_invoice', days_until_due: 30 } : { billing: 'charge_automatically' })
     return stripe.invoices.create(invoice).then(invoice => {
@@ -233,7 +242,13 @@ app.post('/createinvoice', (req, res) => {
     res.send({error})
   })
 })
-
+app.post('/shopifysale', (req, res) => {
+  console.log('received a webhook from shopify')
+  console.dir(req)
+  console.dir(req.body)
+  console.dir(req.get('X-Shopify-Hmac-SHA256'))
+  res.sendStatus(200)
+})
 app.listen(3000, () => {
   console.log(`
     Express-Stripe server listenning on port 3000 in ${process.env.NODE_ENV} mode with ${process.env.keySecret ? process.env.keySecret.includes('live') ? 'secret' : 'test' : 'test'} key`)
