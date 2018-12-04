@@ -84,9 +84,8 @@ module.exports = function () {
     })
   }
 
-  this.shopifyOrder = (req) => {
+  this.shopifyOrder = (req, shopify_secret) => {
     let hmac = req.get('X-Shopify-Hmac-SHA256')
-    let hmac_secret = process.env.shopify_hmac
     console.log(crypto.createHmac('sha256', hmac_secret).update(req.body))
     console.log(crypto.createHmac('sha256', hmac_secret).update(req.body).digest('base64'))
   }
