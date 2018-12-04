@@ -15,6 +15,7 @@ module.exports = function () {
     const customer_id = 'aaa4bac3a7c6'
     const key = 'be7448380ec44d82a5ce81c38344ed10'
     const baseURL = 'https://van.i2ilog.net:9090'
+    const baseURLtest = `https://dev.i2ilog.net:9090`
 
     const urls = {
       getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
@@ -58,7 +59,7 @@ module.exports = function () {
       'soldto': customerOrder
     }
 
-    ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: wholesale ? i.quantity * 12 : i.quantity})).filter(item => item.qty)
+    ship_order.lines = order.items.map(i => Object.assign({}, items.dictionary[i.parent], {qty: wholesale ? i.units : i.quantity})).filter(item => item.qty)
     console.log(' ++++ processed new order ++++')
     console.dir(ship_order)
     console.log(`POST to: ${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`)
@@ -81,5 +82,12 @@ module.exports = function () {
       console.error(error)
       return {error: true, message: error.message}
     })
+  }
+
+  this.shopifyOrder = (req) => {
+    let hmac = req.get('X-Shopify-Hmac-SHA256')
+    let hmac_secret = process.env.shopify_hmac
+    console.log(crypto.createHmac('sha256', hmac_secret).update(req.body))
+    console.log(crypto.createHmac('sha256', hmac_secret).update(req.body).digest('base64'))
   }
 }

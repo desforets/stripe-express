@@ -164,7 +164,7 @@ app.post('/createWholesaleOrder', (req, res) => {
       // if (process.env.NODE_ENV === 'production') {
       //   request.post({ url: automate.order, form: {customer, invoice, charge, skus} })
       // }
-      // dispatchOrder(customer, invoice, charge, true)
+      // dispatchOrder(customer, req.body.order, charge, true)
       // .then(dispatchResults => {
       //   console.log('=== Dispatch resulsts ===')
       //   console.dir(dispatchResults)
@@ -244,9 +244,7 @@ app.post('/createinvoice', (req, res) => {
 })
 app.post('/shopifysale', (req, res) => {
   console.log('received a webhook from shopify')
-  console.dir(req)
-  console.dir(req.body)
-  console.dir(req.get('X-Shopify-Hmac-SHA256'))
+  shopifyOrder(req)
   res.sendStatus(200)
 })
 app.listen(3000, () => {
