@@ -87,10 +87,15 @@ module.exports = function () {
   this.shopifyOrder = (req, shopify_secret) => {
     let hmac = req.get('X-Shopify-Hmac-SHA256')
     let computed_hmac = crypto.createHmac('sha256', shopify_secret).update(JSON.stringify(req.body)).digest('base64')
-    console.log(computed_hmac)
+    let computed_hmac_hex = crypto.createHmac('sha256', shopify_secret).update(JSON.stringify(req.body)).digest('hex')
     console.log(hmac)
+    console.log(computed_hmac)
+    console.log(computed_hmac_hex)
     if (hmac === computed_hmac) {
       console.log('it works!')
+    } else if (hmac === computed_hmac_hex) {
+      console.log('works with hex')
     }
+
   }
 }
