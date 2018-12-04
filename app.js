@@ -244,7 +244,7 @@ app.post('/createinvoice', (req, res) => {
 })
 app.post('/shopifysale', (req, res) => {
   console.log('received a webhook from shopify')
-  shopifyOrder(req, process.env.shopfiy_hmac)
+  shopifyOrder(req, process.env.shopify_hmac)
   res.sendStatus(200)
 })
 app.listen(3000, () => {
