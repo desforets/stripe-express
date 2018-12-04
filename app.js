@@ -1,6 +1,7 @@
 const app = require('express')()
 const stripe = require('stripe')(process.env.keySecret || 'sk_test_0E1OHzPGuv4uzySbXoqRoboW')
 require('./i2i/i2i.js')()
+const shopify_hmac = process.env.shopify_hmac || 'noneset'
 
 const bodyParser = require('body-parser');
 const cors = require('cors')
@@ -243,8 +244,8 @@ app.post('/createinvoice', (req, res) => {
   })
 })
 app.post('/shopifysale', (req, res) => {
-  console.log('received a webhook from shopify: ' + process.env.shopify_hmac)
-  shopifyOrder(req, process.env.shopify_hmac)
+  console.log('received a webhook from shopify: ' + shopify_hmac)
+  shopifyOrder(req, shopify_hmac)
   res.sendStatus(200)
 })
 app.listen(3000, () => {
