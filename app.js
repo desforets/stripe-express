@@ -243,7 +243,7 @@ app.post('/createinvoice', (req, res) => {
   })
 })
 app.post('/shopifysale', (req, res) => {
-  console.log('received a webhook from shopify')
+  console.log('received a webhook from shopify: ' + process.env.shopify_hmac)
   shopifyOrder(req, process.env.shopify_hmac)
   res.sendStatus(200)
 })
