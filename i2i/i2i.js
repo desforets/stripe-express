@@ -33,7 +33,7 @@ module.exports = function () {
     const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
     const msg = `POST+/ibis/api/v1.1/customers/${customer_id}/ship/orders+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
 
-    console.log(' ++++ dispatch Order')
+    console.log(' ++++ dispatch Order ++++ ')
 
     customerOrder = {
       name: customer.shipping.name,
@@ -85,17 +85,93 @@ module.exports = function () {
   }
 
   this.shopifyOrder = (req, shopify_secret) => {
+
     let hmac = req.get('X-Shopify-Hmac-SHA256')
     let computed_hmac = crypto.createHmac('sha256', shopify_secret).update(Buffer.from(req.shopify_data)).digest('base64')
     let computed_hmac_hex = crypto.createHmac('sha256', shopify_secret).update(Buffer.from(req.shopify_data)).digest('hex')
-    console.log(hmac)
-    console.log(computed_hmac)
-    console.log(computed_hmac_hex)
-    if (hmac === computed_hmac) {
-      console.log('it works!')
-    } else if (hmac === computed_hmac_hex) {
-      console.log('works with hex')
-    }
 
+    if (hmac === computed_hmac) {
+      const order = req.body
+      const customer = order.customer
+      const shipping = order.shipping_address
+      let ship_order = {
+        header: {},
+        lines: []
+      }
+      const username = 'earths'
+      const customer_id = 'aaa4bac3a7c6'
+      const key = 'be7448380ec44d82a5ce81c38344ed10'
+      const baseURL = 'https://van.i2ilog.net:9090'
+      const baseURLtest = `https://dev.i2ilog.net:9090`
+
+      const urls = {
+        getItems: `/ibis/api/v1.1/customers/${customer_id}/items`,
+        getItemById: `/ibis/api/v1.1/customers/${customer_id}/items/id/<item_id>`,
+        getOrders: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`,
+        getOrderById: `/ibis/api/v1.1/customers/${customer_id}/ship/order/<order_id>`,
+        postOrder: `/ibis/api/v1.1/customers/${customer_id}/ship/orders`
+      }
+
+      const today = new Date()
+      console.log(`dispatching at: ${today}`)
+      const utcMonth = today.getUTCMonth() + 1
+      const month = utcMonth > 9 ? utcMonth : `0${utcMonth}`
+      const date = today.getUTCDate() > 9 ? today.getUTCDate() : `0${today.getUTCDate()}`
+      const nonce = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
+      const msg = `POST+/ibis/api/v1.1/customers/${customer_id}/ship/orders+${today.getUTCFullYear()}${month}${date}+${nonce}`.toUpperCase()
+
+      console.log(' ++++ dispatch Order ++++ ')
+
+      customerOrder = {
+        name: shipping.name,
+        email: customer.email,
+        address1: shipping.address1,
+        address2: '',
+        code: 'Website',
+        city: shipping.city,
+        country: shipping.country,
+        postal: shipping.zip || shipping.postal_code,
+        province: shipping.province,
+        phone: ''
+      }
+      ship_order.header = {
+        'po_no': 'PO-1234',
+        'service': 'GROUND',
+        'shipper': 'CANADA POST',
+        'number': order.id,
+        'ref_no': order.id,
+        'comment1': `Earth Sun order for ${customer.email}`,
+        'comment2': 'Order place via API v1.1',
+        'shipto': customerOrder,
+        'soldto': customerOrder
+      }
+
+      ship_order.lines = order.line_items.map(i => Object.assign({}, items.dictionary[i.sku], {qty: i.quantity})).filter(item => item.qty)
+      console.log(' ++++ processed new order from shopify ++++')
+      console.dir(ship_order)
+      console.log(`POST to: ${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`)
+      console.log(msg)
+      console.log('HEADERS')
+      console.log(crypto.createHmac('sha256', key).update(msg).digest('base64'))
+      console.log(`earths:${nonce}`)
+      return request.post({
+        headers: {
+          'X-Echo-Signature': crypto.createHmac('sha256', key).update(msg).digest('base64'),
+          'X-Echo-User': `earths:${nonce}`
+        },
+        url: `${baseURL}/ibis/api/v1.1/customers/aaa4bac3a7c6/ship/orders`,
+        form: {"order": JSON.stringify(ship_order)}
+      }).then(response => {
+        response = JSON.parse(response)
+        console.dir(response)
+        return response.status === 'ERR' ? {error: true, message: response.data} : {error: false, orderId: response.data}
+      }).catch(error => {
+        console.error(error)
+        return {error: true, message: error.message}
+      })
+    } else {
+      console.log(`HMAC check failed. BASE: ${computed_hmac} :: hex: ${computed_hmac_hex} :: shopify: ${hmac}`)
+      {error: true, message: `HMAC check failed. BASE: ${computed_hmac} :: hex: ${computed_hmac_hex} :: shopify: ${hmac}`}
+    }
   }
 }
