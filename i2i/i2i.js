@@ -171,7 +171,7 @@ module.exports = function () {
       })
     } else {
       console.log(`HMAC check failed. BASE: ${computed_hmac} :: hex: ${computed_hmac_hex} :: shopify: ${hmac}`)
-      {error: true, message: `HMAC check failed. BASE: ${computed_hmac} :: hex: ${computed_hmac_hex} :: shopify: ${hmac}`}
+      return { error: true, message: `HMAC check failed. BASE: ${computed_hmac} :: hex: ${computed_hmac_hex} :: shopify: ${hmac}` }
     }
   }
 }
